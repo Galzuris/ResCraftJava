@@ -14,7 +14,7 @@ public class Game {
 	private static YamlResult trans = null;
 	private static String transTag = "en";
 	private static Block[] blocks = null;
-	
+
 	private World world = new World();
 
 	public Game() {
@@ -56,7 +56,7 @@ public class Game {
 			return null;
 		}
 	}
-	
+
 	public static int random(int min, int max) {
 		return random.nextInt(max - min) + min;
 	}
@@ -96,6 +96,18 @@ public class Game {
 			if (id > 0) {
 				final Block b = new Block();
 				b.id = id;
+				b.destroyTime = info.GetFloat(root + ".destroy.time", 1f);
+				b.toolOnly = info.GetBool(root + ".tool.only", false);
+				final String toolName = info.GetString(root + ".tool", "any");
+				if (toolName.equals("pickaxe")) {
+					b.tool = Const.ToolPickaxe;
+				} else if (toolName.equals("axe")) {
+					b.tool = Const.ToolAxe;
+				} else if (toolName.equals("shovel")) {
+					b.tool = Const.ToolShovel;
+				} else if (toolName.equals("scissors")) {
+					b.tool = Const.ToolScissors;
+				}
 
 				final Vector2i tex = info.GetVector2i(root + ".texture", null);
 				if (tex != null) {

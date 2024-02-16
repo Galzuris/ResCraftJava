@@ -19,4 +19,10 @@ public class Const {
 	
 	public static final int ColorBlack = 0x000000;
 	public static final int ColorWhite = 0xFFFFFF;
+
+	public static final byte ToolAny = 0;
+	public static final byte ToolPickaxe = 1;
+	public static final byte ToolShovel = 2;
+	public static final byte ToolAxe = 3;
+	public static final byte ToolScissors = 4;
 }

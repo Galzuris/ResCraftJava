@@ -1,6 +1,7 @@
 package com.galzuris.rescraft;
 
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
 
 import com.galzuris.utils.Block;
 
@@ -15,6 +16,7 @@ public class World {
 	private int canvasWidth, canvasHeight;
 	private int widthCount, heightCount;
 	private float timer = 0;
+	private Image editSprite;
 
 	public void init() {
 		this.g = GameEngineCanvas.getInstance().getGraphics();
@@ -22,6 +24,7 @@ public class World {
 		this.canvasHeight = GameEngineCanvas.getInstance().getHeight();
 		this.widthCount = this.canvasWidth / Const.BlockSize + 2;
 		this.heightCount = this.canvasHeight / Const.BlockSize + 2;
+		this.editSprite = Game.loadImage("/img/edit.png");
 		this.clearMap();
 	}
 
@@ -31,7 +34,8 @@ public class World {
 		g.fillRect(0, 0, canvasWidth, canvasHeight);
 		final int posx = (int) (Math.sin(timer) * Const.BlockSize) + Const.BlockSize;
 		final int posy = (int) (Math.cos(timer) * Const.BlockSize) + Const.BlockSize;
-		if (timer > Math.PI * 2) timer -= Math.PI * 2;
+		if (timer > Math.PI * 2)
+			timer -= Math.PI * 2;
 
 		for (int x = 0; x < this.widthCount; x++) {
 			for (int y = 0; y < this.heightCount; y++) {
@@ -47,6 +51,14 @@ public class World {
 				if (bf != null) {
 					g.drawImage(bf.frontSprite, px, py, 0);
 				}
+			}
+		}
+
+		for (int x = 0; x < this.widthCount; x += 2) {
+			for (int y = 0; y < this.heightCount; y += 2) {
+				final int px = x * Const.BlockSize - posx;
+				final int py = y * Const.BlockSize - posy;
+				g.drawImage(editSprite, px, py, 0);
 			}
 		}
 	}
