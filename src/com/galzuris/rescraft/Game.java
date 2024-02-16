@@ -1,6 +1,7 @@
 package com.galzuris.rescraft;
 
 import java.io.IOException;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.microedition.lcdui.Image;
@@ -8,16 +9,19 @@ import javax.microedition.lcdui.Image;
 import com.galzuris.utils.*;
 
 public class Game {
+	private static final Random random = new Random();
 	private static Game instance;
 	private static YamlResult trans = null;
 	private static String transTag = "en";
 	private static Block[] blocks = null;
+	
+	private World world = new World();
 
 	public Game() {
 		Game.instance = this;
 	}
 
-	public Game getInstance() {
+	public static Game getInstance() {
 		return Game.instance;
 	}
 
@@ -25,9 +29,11 @@ public class Game {
 		Log.write("[game] init");
 		this.loadTranslations("/configs/translate.yml");
 		this.loadBlocks();
+		world.init();
 	}
 
 	public void update(final float delta) {
+		world.update(delta);
 	}
 
 	public static String tr(String key) {
@@ -49,6 +55,10 @@ public class Game {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static int random(int min, int max) {
+		return random.nextInt(max - min) + min;
 	}
 
 	private void loadTranslations(final String path) {
@@ -91,7 +101,7 @@ public class Game {
 				if (tex != null) {
 					b.frontSprite = Image.createImage(blocksImage, tex.x * Const.BlockSize, tex.y * Const.BlockSize,
 							Const.BlockSize, Const.BlockSize, 0);
-					b.backSprite = this.changeImageValue(b.frontSprite, 0.6f);
+					b.backSprite = this.changeImageValue(b.frontSprite, 0.5f);
 				}
 
 				blocks[id] = b;
