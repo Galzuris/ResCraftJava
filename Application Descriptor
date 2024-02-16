@@ -1,0 +1,9 @@
+MIDlet-Vendor: Galzuris
+MIDlet-Version: 3.0.6
+MIDlet-Info-URL: https://galzuris.com/p/rescraft_java
+MicroEdition-Configuration: CLDC-1.0
+MIDlet-Name: ResCraft
+MIDlet-1: ResCraft,/icon.png,com.galzuris.rescraft.ResCraft
+MIDlet-Description: 2D blocky survival game, with craft, mobs and base building
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ResCraft.jar
