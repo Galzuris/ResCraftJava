@@ -61,6 +61,12 @@ public class World {
 				g.drawImage(editSprite, px, py, 0);
 			}
 		}
+		
+		//g.drawImage(Game.ImageAuthor, 10, 10, 0);
+		g.drawImage(Game.ImageShadowBlack, 0, 0, 0);
+		g.drawImage(Game.ImageShadowRed, 64, 0, 0);
+		Game.drawNumber(g, 10, 10, 6543, Const.ColorWhite);
+		Game.drawNumber(g, 10, 20, 2109, Const.ColorBlack);
 	}
 
 	private void clearMap() {
@@ -74,4 +80,8 @@ public class World {
 			}
 		}
 	}
+	
+//	private class Entity {
+//		public float x, y, sx, sy, w, h;
+//	}
 }

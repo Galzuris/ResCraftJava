@@ -4,12 +4,25 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.Vector;
 
+import javax.microedition.lcdui.Graphics;
 import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.game.Sprite;
 
 import com.galzuris.utils.*;
 
 public class Game {
 	private static final Random random = new Random();
+	
+	public static Image ImageTitle = null;
+	public static Image ImageInventory = null;
+	public static Image ImageInventorySelect = null;
+	public static Image ImageInventoryRed = null;
+	public static Image ImageAuthor = null;
+	public static Image ImageShadowBlack = null;
+	public static Image ImageShadowRed = null;
+	
+	private static GameSprite spriteWhiteNumbers;
+	private static GameSprite spriteGreenNumbers;
 	private static Game instance;
 	private static YamlResult trans = null;
 	private static String transTag = "en";
@@ -24,11 +37,16 @@ public class Game {
 	public static Game getInstance() {
 		return Game.instance;
 	}
+	
+	public static void log(String text) {
+		System.out.println(text);
+	}
 
 	public void init() {
-		Log.write("[game] init");
+		Game.log("[game] init");
 		this.loadTranslations("/configs/translate.yml");
 		this.loadBlocks();
+		this.loadImages();
 		world.init();
 	}
 
@@ -60,17 +78,44 @@ public class Game {
 	public static int random(int min, int max) {
 		return random.nextInt(max - min) + min;
 	}
+	
+	public static void drawNumber(Graphics g, int x, int y, int num, int color) {
+		final int numSize = 5;
+		int size = numSize;
+		if (num >= 1000) {
+			size = numSize * 4;
+		} else if (num >= 100) {
+			size = numSize * 3;
+		} else if (num >= 10) {
+			size = numSize * 2;
+		}
+
+		int pos = x + size;
+		int n = num;
+		while (n > 0) {
+			final int digit = n % 10;
+			if (color == Const.ColorWhite) {
+				spriteWhiteNumbers.setFrame(digit);
+				spriteWhiteNumbers.draw(g, pos, y);
+			} else {
+				spriteGreenNumbers.setFrame(digit);
+				spriteGreenNumbers.draw(g, pos, y);
+			}
+			n = n / 10;
+			pos -= numSize;
+		}
+	}
 
 	private void loadTranslations(final String path) {
 		final String list = Text.LoadFromResource(path, Text.ENCODING_UTF8);
 		trans = YamlParser.parse(list);
-		Log.write("[game] loaded " + trans.roots.size() + " translations");
+		Game.log("[game] loaded " + trans.roots.size() + " translations");
 	}
 
 	private void loadBlocks() {
 		final Image blocksImage = Game.loadImage("/img/blocks.png");
 		if (blocksImage == null) {
-			Log.write("[game] error loading blocks sprites");
+			Game.log("[game] error loading blocks sprites");
 			return;
 		}
 
@@ -78,7 +123,7 @@ public class Game {
 		final YamlResult info = YamlParser.parse(list);
 
 		final int count = info.roots.size();
-		Log.write("[game] loaded " + count + " blocks");
+		Game.log("[game] loaded " + count + " blocks");
 
 		int max = 0;
 		for (int i = 0; i < count; i++) {
@@ -121,6 +166,50 @@ public class Game {
 		}
 	}
 
+	private void loadImages() {
+		final Image gui = Game.loadImage("/img/gui.png");
+		ImageAuthor = Image.createImage(gui, 0, 35, 49, 63, 0);
+		
+		if (GameEngineCanvas.getInstance().isBigScreen()) {
+			ImageTitle = Image.createImage(gui, 0, 0, 128, 17, 0);
+			ImageInventory = Image.createImage(gui, 104, 78, 24, 24, 0);
+			ImageInventorySelect = Image.createImage(gui, 102, 102, 26, 26, 0);
+			ImageInventoryRed = Image.createImage(gui, 76, 102, 26, 26, 0);
+		} else {
+			ImageTitle = Image.createImage(gui, 0, 119, 65, 9, 0);
+			ImageInventory = Image.createImage(gui, 112, 18, 16, 16, 0);
+			ImageInventorySelect = Image.createImage(gui, 110, 52, 18, 18, 0);
+			ImageInventoryRed = Image.createImage(gui, 110, 34, 18, 18, 0);
+		}
+		
+		ImageShadowBlack = createShadow(gui, 124, 73, 48);
+		ImageShadowRed = createShadow(gui, 120, 73, 48);
+		
+		final int[] numFrames = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+		Image whiteNumbers = Image.createImage(gui, 0, 18, 48, 7, 0);
+		Image greenNumbers = Image.createImage(gui, 0, 26, 48, 7, 0);
+		spriteWhiteNumbers = new GameSprite(whiteNumbers, 4, 7, 0, 0);
+		spriteWhiteNumbers.setFrameSequence(numFrames);
+		spriteGreenNumbers = new GameSprite(greenNumbers, 4, 7, 0, 0);
+		spriteGreenNumbers.setFrameSequence(numFrames);
+		Game.log("[game] images loaded");
+	}
+	
+	private Image createShadow(Image source, int x, int y, int side) {
+		int[] shadow = new int[1];
+		source.getRGB(shadow, 0, 1, x, y, 1, 1);
+
+		int shadowColor = shadow[0];
+		final int size = side * side;
+		shadow = new int[size];
+		
+		for (int i = 0; i < size; i++) {
+			shadow[i] = shadowColor;
+		}
+		
+		return Image.createRGBImage(shadow, side, side, true);
+	}
+	
 	private Image changeImageValue(Image source, float k) {
 		final int w = source.getWidth();
 		final int h = source.getHeight();
@@ -151,5 +240,28 @@ public class Game {
 			data[i] = (a << 24 | r << 16 | g << 8 | b);
 		}
 		return Image.createRGBImage(data, w, h, true);
+	}
+	
+	public class GameSprite extends Sprite {
+		public float FrameTime = 0.15f;
+		private float delta = 0f;
+		
+		public GameSprite(Image img, int w, int h, int refX, int refY) {
+			super(img, w, h);
+			this.defineReferencePixel(refX, refY);
+		}
+		
+		public void draw(Graphics g, int x, int y) {
+			this.setRefPixelPosition(x, y);
+			this.paint(g);
+		}
+		
+		public void update(float delta) {
+			this.delta -= delta;
+			if (this.delta <= 0) {
+				this.delta = FrameTime;
+				this.nextFrame();
+			}
+		}
 	}
 }

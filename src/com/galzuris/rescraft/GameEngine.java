@@ -93,7 +93,7 @@ public class GameEngine implements Runnable {
 				deltaSeconds = (float)(loopDelta * 0.001);
 
 			} catch (InterruptedException e) {
-				Log.write("[engine] run loop exception");
+				Game.log("[engine] run loop exception");
 				e.printStackTrace();
 			}
 		}

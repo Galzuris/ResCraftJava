@@ -22,7 +22,7 @@ public class GameEngineCanvas extends GameCanvas {
 	protected GameEngineCanvas() {
 		super(false);
 		GameEngineCanvas.instance = this;
-		Log.write("[canvas] is_touch: " + this.hasPointerEvents());
+		Game.log("[canvas] is_touch: " + this.hasPointerEvents());
 
 		keys = new KeyData[2];
 		keys[0] = new KeyData(Const.KeySoftLeft);
@@ -38,6 +38,10 @@ public class GameEngineCanvas extends GameCanvas {
 
 	public static GameEngineCanvas getInstance() {
 		return GameEngineCanvas.instance;
+	}
+	
+	public boolean isBigScreen() {
+		return this.getWidth() >= 168;
 	}
 
 	public Graphics getGraphics() {
