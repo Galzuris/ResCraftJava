@@ -1,7 +1,6 @@
 package com.galzuris.rescraft;
 
 import javax.microedition.lcdui.Graphics;
-import javax.microedition.lcdui.Image;
 
 import com.galzuris.utils.Block;
 
@@ -16,7 +15,6 @@ public class World {
 	private int canvasWidth, canvasHeight;
 	private int widthCount, heightCount;
 	private float timer = 0;
-	private Image editSprite;
 
 	public void init() {
 		this.g = GameEngineCanvas.getInstance().getGraphics();
@@ -24,7 +22,6 @@ public class World {
 		this.canvasHeight = GameEngineCanvas.getInstance().getHeight();
 		this.widthCount = this.canvasWidth / Const.BlockSize + 2;
 		this.heightCount = this.canvasHeight / Const.BlockSize + 2;
-		this.editSprite = Game.loadImage("/img/edit.png");
 		this.clearMap();
 	}
 
@@ -54,19 +51,13 @@ public class World {
 			}
 		}
 
-		for (int x = 0; x < this.widthCount; x += 2) {
-			for (int y = 0; y < this.heightCount; y += 2) {
+		for (int x = 0; x < this.widthCount; x += 3) {
+			for (int y = 0; y < this.heightCount; y += 3) {
 				final int px = x * Const.BlockSize - posx;
 				final int py = y * Const.BlockSize - posy;
-				g.drawImage(editSprite, px, py, 0);
+				g.drawImage(Game.ImageEditGrid, px, py, 0);
 			}
 		}
-		
-		//g.drawImage(Game.ImageAuthor, 10, 10, 0);
-		g.drawImage(Game.ImageShadowBlack, 0, 0, 0);
-		g.drawImage(Game.ImageShadowRed, 64, 0, 0);
-		Game.drawNumber(g, 10, 10, 6543, Const.ColorWhite);
-		Game.drawNumber(g, 10, 20, 2109, Const.ColorBlack);
 	}
 
 	private void clearMap() {

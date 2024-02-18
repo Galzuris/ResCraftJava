@@ -63,6 +63,11 @@ public class GameEngineCanvas extends GameCanvas {
 	public boolean isActionClicked(int key) {
 		return this.checkClicked(key, actions);
 	}
+	
+	public void repaintGraphics() {
+		this.flushGraphics();
+		this.keysStep();
+	}
 
 	public void keysStep() {
 		this.updateKeys(keys);

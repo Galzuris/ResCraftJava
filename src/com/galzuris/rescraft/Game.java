@@ -9,6 +9,7 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.game.Sprite;
 
 import com.galzuris.utils.*;
+import com.galzuris.utils.YamlResult.Vector2i;
 
 public class Game {
 	private static final Random random = new Random();
@@ -20,6 +21,7 @@ public class Game {
 	public static Image ImageAuthor = null;
 	public static Image ImageShadowBlack = null;
 	public static Image ImageShadowRed = null;
+	public static Image ImageEditGrid = null;
 	
 	private static GameSprite spriteWhiteNumbers;
 	private static GameSprite spriteGreenNumbers;
@@ -48,6 +50,18 @@ public class Game {
 		this.loadBlocks();
 		this.loadImages();
 		world.init();
+
+		// dev
+		final GameEngineCanvas gc = GameEngineCanvas.getInstance();
+		gc.getGraphics().setColor(Const.ColorBlack);
+		gc.getGraphics().fillRect(0, 0, gc.getWidth(), gc.getHeight());
+		final int logoX = (gc.getWidth() - ImageAuthor.getWidth()) / 2;
+		final int logoY = (gc.getHeight() - ImageAuthor.getHeight()) / 2;
+		gc.getGraphics().drawImage(ImageAuthor, logoX, logoY, 0);
+		gc.repaintGraphics();
+		GameEngine.getInstance().sleep(500);
+		ImageAuthor = null;
+		System.gc();
 	}
 
 	public void update(final float delta) {
@@ -90,7 +104,7 @@ public class Game {
 			size = numSize * 2;
 		}
 
-		int pos = x + size;
+		int pos = x + size - numSize;
 		int n = num;
 		while (n > 0) {
 			final int digit = n % 10;
@@ -186,13 +200,41 @@ public class Game {
 		ImageShadowRed = createShadow(gui, 120, 73, 48);
 		
 		final int[] numFrames = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-		Image whiteNumbers = Image.createImage(gui, 0, 18, 48, 7, 0);
-		Image greenNumbers = Image.createImage(gui, 0, 26, 48, 7, 0);
+		final Image whiteNumbers = Image.createImage(gui, 0, 18, 48, 7, 0);
+		final Image greenNumbers = Image.createImage(gui, 0, 26, 48, 7, 0);
 		spriteWhiteNumbers = new GameSprite(whiteNumbers, 4, 7, 0, 0);
 		spriteWhiteNumbers.setFrameSequence(numFrames);
 		spriteGreenNumbers = new GameSprite(greenNumbers, 4, 7, 0, 0);
 		spriteGreenNumbers.setFrameSequence(numFrames);
+		
+		final Image edit = Image.createImage(gui, 93, 52, 16, 16, 0);
+		ImageEditGrid = this.repeatImage(edit, 3);
+		
 		Game.log("[game] images loaded");
+	}
+	
+	private Image repeatImage(Image source, int repeats) {
+		final int sw = source.getWidth();
+		final int sh = source.getHeight();
+		final int tw = sw * repeats;
+		final int th = sh * repeats;
+		final int[] sourceRgb = new int[sw * sh];
+		final int[] targetRgb = new int[tw * th];
+
+		source.getRGB(sourceRgb, 0, sh, 0, 0, sw, sh);
+		for (int sx = 0; sx < sw; sx++) {
+			for (int sy = 0; sy < sh; sy++) {
+				final int sourceId = sy * sw + sx;
+				for (int rx = 0; rx < repeats; rx++) {
+					for (int ry = 0; ry < repeats; ry++) {
+						final int targetId = (sy + ry * sh) * tw + (sx + rx * sw);
+						targetRgb[targetId] = sourceRgb[sourceId];
+					}
+				}
+			}
+		}
+
+		return Image.createRGBImage(targetRgb, tw, th, true);
 	}
 	
 	private Image createShadow(Image source, int x, int y, int side) {
@@ -242,20 +284,42 @@ public class Game {
 		return Image.createRGBImage(data, w, h, true);
 	}
 	
+	public Image resizeImage(final Image temp, final int newX, final int newY) {
+		final int tw = temp.getWidth();
+		final int th = temp.getHeight();
+		final int[] rgb = new int[tw * th];
+		temp.getRGB(rgb, 0, tw, 0, 0, tw, th);
+		final int[] rgb2 = reescalaArray(rgb, tw, th, newX, newY);
+		final Image temp2 = Image.createRGBImage(rgb2, newX, newY, true);
+		return temp2;
+	}
+
+	private int[] reescalaArray(final int[] ini, final int x, final int y, final int x2, final int y2) {
+		final int[] out = new int[x2 * y2];
+		for (int yy = 0; yy < y2; ++yy) {
+			final int dy = yy * y / y2;
+			for (int xx = 0; xx < x2; ++xx) {
+				final int dx = xx * x / x2;
+				out[x2 * yy + xx] = ini[x * dy + dx];
+			}
+		}
+		return out;
+	}
+	
 	public class GameSprite extends Sprite {
 		public float FrameTime = 0.15f;
 		private float delta = 0f;
-		
+
 		public GameSprite(Image img, int w, int h, int refX, int refY) {
 			super(img, w, h);
 			this.defineReferencePixel(refX, refY);
 		}
-		
+
 		public void draw(Graphics g, int x, int y) {
 			this.setRefPixelPosition(x, y);
 			this.paint(g);
 		}
-		
+
 		public void update(float delta) {
 			this.delta -= delta;
 			if (this.delta <= 0) {
