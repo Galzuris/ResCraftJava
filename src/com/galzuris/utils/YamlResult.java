@@ -17,7 +17,7 @@ public class YamlResult {
 		}
 		return def;
 	}
-	
+
 	public long GetLong(String tag, long def) {
 		if (values.containsKey(tag)) {
 			try {
@@ -27,7 +27,7 @@ public class YamlResult {
 		}
 		return def;
 	}
-	
+
 	public float GetFloat(String tag, float def) {
 		if (values.containsKey(tag)) {
 			try {
@@ -118,14 +118,30 @@ public class YamlResult {
 		}
 		return def;
 	}
-	
+
 	public void debug() {
 		System.out.println("Yaml Debug");
 		final Enumeration el = values.keys();
-		while(el.hasMoreElements()) {
+		while (el.hasMoreElements()) {
 			final String key = (String) el.nextElement();
 			final String val = (String) values.get(key);
 			System.out.println(key + " = " + val);
+		}
+	}
+
+	public class Vector2i {
+		public int x, y;
+
+		public Vector2i() {
+		}
+
+		public Vector2i(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		public String toYamlValue() {
+			return x + "," + y;
 		}
 	}
 }

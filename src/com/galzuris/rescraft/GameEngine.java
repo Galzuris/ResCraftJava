@@ -61,6 +61,13 @@ public class GameEngine implements Runnable {
 			}
 		}
 	}
+	
+	public void sleep(int ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+		}
+	}
 
 	public void run() {
 		this.stoped = false;
@@ -81,8 +88,7 @@ public class GameEngine implements Runnable {
 
 				if (!this.paused) {
 					this.game.update(deltaSeconds);
-					this.canvas.flushGraphics();
-					this.canvas.keysStep();
+					this.canvas.repaintGraphics();
 				}
 
 				long realDelta = System.currentTimeMillis() - startTime;
@@ -93,7 +99,7 @@ public class GameEngine implements Runnable {
 				deltaSeconds = (float)(loopDelta * 0.001);
 
 			} catch (InterruptedException e) {
-				Log.write("[engine] run loop exception");
+				Game.log("[engine] run loop exception");
 				e.printStackTrace();
 			}
 		}
